@@ -26,15 +26,15 @@ class FilterBuilder {
     }
 
     public function generate_form( $taxonomy_name = 'none' ) { ?>
-
-    <form action="<?php echo site_url() ?>/wp-admin/admin-ajax.php" method="POST" id="filter">
+    <div class="filter-groups">
+        <form action="<?php echo site_url() ?>/wp-admin/admin-ajax.php" method="POST" id="filter">   
 
     <?php
     // Try and generate taxonomy drop down only if $taxonomy_name was specified.
     if ( $taxonomy_name != 'none' && !empty ( $taxonomy_name ) ) {
         // Generate the category fields if it generates any results.
         if( $terms = $this->get_categories_by_post_type( $taxonomy_name, $this->get_content_type() ) ) {
-            echo '<select name="categoryfilter"><option value="">Select category...</option>';
+            echo '<select name="categoryfilter" class="chosen-select"><option value="">Filter by category</option>';
             foreach ( $terms as $term ) :
                 echo '<option value="' . $term->term_id . '">' . $term->name . '</option>'; // ID of the category as the value of an option
             endforeach;
@@ -71,9 +71,10 @@ class FilterBuilder {
     }
 
     ?>
-    <button><?php echo __('Apply filter', 'scorpiotek' ); ?></button>
+    <button id="filter-button"><?php echo __('Apply filter', 'scorpiotek' ); ?></button>
 	<input type="hidden" name="action" value="myfilter">
     </form>
+    </div> <!-- Filter Groups -->
     
     <?php
 
@@ -95,32 +96,10 @@ class FilterBuilder {
                         $query = new WP_Query( $query_args );
                     }
                     if ( $query->have_posts() ) : while ( $query-> have_posts() ): $query->the_post() ?>
-                        <div class='scorpiotek_post_single'>
-                            <div class='post-meta'>
-                                <?php 
-                                    foreach ( $this->get_post_fields_to_print() as $post_field => $post_field_type ) {
-                                        echo ( '<span id="' . $post_field .  '">' );
-                                        switch ( $post_field_type ) {
-                                            case 'title':
-                                                the_title();
-                                                break;
-                                            case 'image':
-                                                $image_size = 'thumbnail';
-                                                $image = get_field( $post_field );
-                                                echo wp_get_attachment_image( $image, $image_size );
-                                                break;
-                                            case 'text':
-                                                the_field( $post_field );
-                                                break;
-                                            default:
-                                                # code...
-                                                break;
-                                        }
-                                        echo (' </span>' );
-                                    }
-                                ?>
-                            </div>
-                        </div>
+                    <?php   
+                        include( 'single-template.php' );
+                    ?>
+                        
                     <?php
                         endwhile;
                     endif;
@@ -150,7 +129,7 @@ class FilterBuilder {
     }
 
     private function print_field_values( $field_name, $field_label, $field_array ) {
-        echo '<select name="' . $field_name . 'filter"><option value="">Select ' . $field_label . '...</option>';
+        echo '<select name="' . $field_name . '" class="chosen-select"><option value="">Filter by ' . $field_label . '</option>';
         foreach ( $field_array as $field_value ) :
             echo '<option value="' . $field_value . '">' . $field_value . '</option>'; // ID of the category as the value of an option
         endforeach;
@@ -165,11 +144,13 @@ class FilterBuilder {
             // 'order'	=> $_POST['date'] ,
         );
         
-        // For taxonomies or categories.
+        /* This will only work if the 'Enable Events Categories System' of the squarecandy-acf-events
+         * is enabled */
+        
         if( !empty( $_POST['categoryfilter'] ) )
 		$args['tax_query'] = array(
 			array(
-				'taxonomy' => 'category',
+				'taxonomy' => 'events-category',
 				'field' => 'term_id',
                 'terms' => $_POST['categoryfilter'],
                 'operator'=> 'IN',
@@ -177,10 +158,10 @@ class FilterBuilder {
         );
         
         foreach ( $this->get_filter_fields() as $filter_label => $filter_name ) {
-            if( !empty( $_POST[ $filter_name . 'filter'] ) )  {
+            if( !empty( $_POST[ $filter_name ] ) )  {
                 $args['meta_query'][] = array(
                     'key' => $filter_name,
-                    'value' => $_POST[ $filter_name . 'filter'],
+                    'value' => $_POST[ $filter_name ],
                     'compare' => '='
                 );
             }
