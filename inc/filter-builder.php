@@ -10,13 +10,11 @@ class FilterBuilder {
 
     private $content_type;
     private $filter_fields;
-    private $post_fields_to_print;
 
-    public function __construct( $content_type, $filter_fields, $post_fields_to_print ) {
+    public function __construct( $content_type, $filter_fields ) {
         if ( !empty ($content_type ) ) {
             $this->set_content_type( $content_type );
             $this->set_filter_fields( $filter_fields );
-            $this->set_post_fields_to_print( $post_fields_to_print );
             add_action('wp_ajax_myfilter', array( $this, 'scorpiotek_filter_function' ) );
             add_action('wp_ajax_nopriv_myfilter', array( $this, 'scorpiotek_filter_function' ) );              
         }
@@ -85,32 +83,32 @@ class FilterBuilder {
             include( 'no-query-found.php' );
             return;
         }
-
-        if ( ( is_array( $this->get_post_fields_to_print() ) && !empty( $this->get_post_fields_to_print() ) ) ) : ?>
-                <?php
-                    $query_args = array(
-                        'post_type' => $this->get_content_type(),
-                        'post_status' => 'publish',
-                        'posts_per_page' => $post_count,
-                    );
-                    $query = '';
-                    if ( !is_null( $wp_query ) && !empty ( $wp_query ) ) {
-                        $query = $wp_query;
-                    }
-                    else {
-                        $query = new WP_Query( $query_args );
-                    }
-                    if ( $query->have_posts() ) : while ( $query-> have_posts() ): $query->the_post() ?>
-                    <?php   
-                        include( 'single-template.php' );
-                    ?>
-                        
-                    <?php
-                        endwhile;
-                    endif;
-                ?>
+        $query_args = array(
+            'post_type' => $this->get_content_type(),
+            'post_status' => 'publish',
+            'posts_per_page' => $post_count,
+        );
+        $query = '';
+        if ( !is_null( $wp_query ) && !empty ( $wp_query ) ) {
+            $query = $wp_query;
+        }
+        else {
+            $query = new WP_Query( $query_args );
+        }
+        if ( $query->have_posts() ) : while ( $query-> have_posts() ): $query->the_post() ?>
+            <?php   
+            if ( file_exists( plugin_dir_path( __FILE__ ) . '../single-templates/' . $this->get_content_type() . '-template.php' ) ) {
+                include(  plugin_dir_path( __FILE__ ) . '../single-templates/' . $this->get_content_type() . '-template.php' );
+            }
+            else {
+                error_log( 'Error loading file ' . $this->get_content_type() . '-template.php' );
+            }
+            ?>
+            
         <?php
+            endwhile;
         endif;
+
     }
 
 
@@ -207,21 +205,6 @@ class FilterBuilder {
      */
     public function get_filter_fields() {
         return $this->filter_fields;
-    }
-
-    /**
-     * Setter for post_fields_to_print
-     *
-     * @param string $post_fields_to_print the new value of the post_fields_to_print property.
-     */
-    public function set_post_fields_to_print( $post_fields_to_print ) {
-        $this->post_fields_to_print = $post_fields_to_print;
-    }
-    /**
-     * Getter for the post_fields_to_print property.
-     */
-    public function get_post_fields_to_print() {
-        return $this->post_fields_to_print;
     }
 
 }
