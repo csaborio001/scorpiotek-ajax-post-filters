@@ -81,7 +81,12 @@ class FilterBuilder {
     }
 
     public function print_post_list( $post_count = 0, $wp_query = null ) {
-        if ( $post_count != 0 && !empty ( $post_count ) && ( is_array( $this->get_post_fields_to_print() ) && !empty( $this->get_post_fields_to_print() ) ) ) : ?>
+        if ( $post_count == 0 || empty ( $post_count ) ) {
+            include( 'no-query-found.php' );
+            return;
+        }
+
+        if ( ( is_array( $this->get_post_fields_to_print() ) && !empty( $this->get_post_fields_to_print() ) ) ) : ?>
                 <?php
                     $query_args = array(
                         'post_type' => $this->get_content_type(),
@@ -169,7 +174,7 @@ class FilterBuilder {
 
         $query = new WP_Query( $args );
  
-        $this->print_post_list( -1, $query );
+        $this->print_post_list( $query->post_count, $query );
      
         die();        
     }

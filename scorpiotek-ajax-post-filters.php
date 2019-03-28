@@ -16,9 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Enqueue the required ajax code to handle the requests.
 function scorpiotek_events_enqueue_scripts() {
-    wp_enqueue_script('data-request-js', plugins_url( 'js/data-request.js', __FILE__), array('jquery'), false, true);
-    wp_enqueue_script('chosen-loader-js', plugins_url( 'js/chosen-loader.js', __FILE__), array('jquery'), false, true);
-    wp_enqueue_script('chosen-js', plugins_url( 'js/chosen/chosen.jquery.min.js', __FILE__), array('jquery'), '1.8.7', true);
+    wp_enqueue_script('data-request-js', plugins_url( 'js/data-request.js', __FILE__), '', false, true );
+    wp_script_add_data( 'data-request-js', 'defer', true );
+    wp_enqueue_script('chosen-loader-js', plugins_url( 'js/chosen-loader.js', __FILE__), array('jquery'), false, false) ;
+    wp_script_add_data( 'chosen-loader-js', 'defer', true );
+    wp_enqueue_script('chosen-js', plugins_url( 'js/chosen/chosen.jquery.min.js', __FILE__), array('jquery'), '1.8.7', false );
+    wp_script_add_data( 'chosen-js', 'async', true );
 }
 add_action('wp_enqueue_scripts', 'scorpiotek_events_enqueue_scripts');
 

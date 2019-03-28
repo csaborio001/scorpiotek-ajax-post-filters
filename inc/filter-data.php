@@ -5,8 +5,8 @@ if ( class_exists( FilterBuilder::class ) ) {
 
     $filter_fields = array(
         // Text to Display => Field Name
-        'Postal Code'=> 'zip',
-        'Venue' => 'venue',
+        'Suburb' => 'city',
+        'Postal Code' => 'zip',
     );
     $post_fields_to_print = array(
         'event_image' => 'image',
