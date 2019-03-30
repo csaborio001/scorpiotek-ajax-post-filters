@@ -11,10 +11,11 @@ class FilterBuilder {
     private $content_type;
     private $filter_fields;
 
-    public function __construct( $content_type, $filter_fields ) {
+    public function __construct( $content_type, $filter_fields, $meta_query ) {
         if ( !empty ($content_type ) ) {
             $this->set_content_type( $content_type );
             $this->set_filter_fields( $filter_fields );
+            $this->set_meta_query( $meta_query );
             add_action('wp_ajax_myfilter', array( $this, 'scorpiotek_filter_function' ) );
             add_action('wp_ajax_nopriv_myfilter', array( $this, 'scorpiotek_filter_function' ) );              
         }
@@ -48,14 +49,7 @@ class FilterBuilder {
                 'post_status' => 'publish',
                 'posts_per_page' => -1,
                 // Only look for posts that will happen today or in the future.
-                'meta_query' => array(
-                    array(
-                        'key' => 'start_date',
-                        'value' => (new DateTime('now'))->format('Ymd'),
-                        'compare' => '>=',
-                        'type' => 'date',
-                    ),
-                )
+                'meta_query' => $this->get_meta_query(),
             );
             $query  = new WP_Query( $query_args );
             $field_array = array();
@@ -87,6 +81,7 @@ class FilterBuilder {
             'post_type' => $this->get_content_type(),
             'post_status' => 'publish',
             'posts_per_page' => $post_count,
+            'meta_query' => $this->get_meta_query(),
         );
         $query = '';
         if ( !is_null( $wp_query ) && !empty ( $wp_query ) ) {
@@ -206,6 +201,24 @@ class FilterBuilder {
     public function get_filter_fields() {
         return $this->filter_fields;
     }
+
+    /**
+     * Setter for meta_query
+     *
+     * @param string $meta_query the new value of the meta_query property.
+     */
+    public function set_meta_query( $meta_query ) {
+        $this->meta_query = $meta_query;
+    }
+    /**
+     * Getter for the meta_query property.
+     */
+    public function get_meta_query() {
+        return $this->meta_query;
+    }    
+
+    
+    
 
 }
 

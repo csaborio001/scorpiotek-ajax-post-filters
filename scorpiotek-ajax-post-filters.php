@@ -3,7 +3,7 @@
     Plugin Name: ScorpioTek Ajax Post Filters
     Description: Creates dropdown menus to filter specific content types fields
     @since  1.0
-    Version: 1.0.2
+    Version: 1.0.2.1
 	Text Domain: scorpiotek.com
 */
 

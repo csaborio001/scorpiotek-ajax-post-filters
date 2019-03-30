@@ -11,6 +11,14 @@ if ( class_exists( FilterBuilder::class ) ) {
                 'Suburb' => 'city',
                 'Postal Code' => 'zip',
             ),
+            'meta_query' => array(
+                array(
+                    'key' => 'start_date',
+                    'value' => (new DateTime('now'))->format('Ymd'),
+                    'compare' => '>=',
+                    'type' => 'date',
+                ),
+            ),
         ),
     );
 
@@ -18,6 +26,6 @@ if ( class_exists( FilterBuilder::class ) ) {
     global $filter_builder;
 
     foreach ($filter_list as $filter ) {
-        $filter_builder[$filter['content_type']] = new FilterBuilder( $filter[ 'content_type' ], $filter[ 'filter_fields' ] );
+        $filter_builder[$filter['content_type']] = new FilterBuilder( $filter[ 'content_type' ], $filter[ 'filter_fields' ], $filter['meta_query'] );
     }
 }
