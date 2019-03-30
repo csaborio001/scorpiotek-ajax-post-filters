@@ -11,11 +11,12 @@ class FilterBuilder {
     private $content_type;
     private $filter_fields;
 
-    public function __construct( $content_type, $filter_fields, $meta_query ) {
+    public function __construct( $content_type, $filter_fields, $meta_query, $taxonomy ) {
         if ( !empty ($content_type ) ) {
             $this->set_content_type( $content_type );
             $this->set_filter_fields( $filter_fields );
             $this->set_meta_query( $meta_query );
+            $this->set_taxonomy( $taxonomy );
             add_action('wp_ajax_myfilter', array( $this, 'scorpiotek_filter_function' ) );
             add_action('wp_ajax_nopriv_myfilter', array( $this, 'scorpiotek_filter_function' ) );              
         }
@@ -142,13 +143,10 @@ class FilterBuilder {
             // 'order'	=> $_POST['date'] ,
         );
         
-        /* This will only work if the 'Enable Events Categories System' of the squarecandy-acf-events
-         * is enabled */
-        
         if( !empty( $_POST['categoryfilter'] ) )
 		$args['tax_query'] = array(
 			array(
-				'taxonomy' => 'events-category',
+				'taxonomy' => $this->get_taxonomy(),
 				'field' => 'term_id',
                 'terms' => $_POST['categoryfilter'],
                 'operator'=> 'IN',
@@ -215,7 +213,24 @@ class FilterBuilder {
      */
     public function get_meta_query() {
         return $this->meta_query;
-    }    
+    }
+
+    /**
+     * Setter for taxonomy
+     *
+     * @param string $taxonomy the new value of the taxonomy property.
+     */
+    public function set_taxonomy( $taxonomy ) {
+        $this->taxonomy = $taxonomy;
+    }
+    /**
+     * Getter for the taxonomy property.
+     */
+    public function get_taxonomy() {
+        return $this->taxonomy;
+    }
+
+    
 
     
     

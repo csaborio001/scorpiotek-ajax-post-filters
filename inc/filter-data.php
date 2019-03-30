@@ -6,6 +6,7 @@ if ( class_exists( FilterBuilder::class ) ) {
     $filter_list = array(
         array(
             'content_type' => 'event',
+            'taxonomy' => 'events-category',
             'filter_fields' => array(
                 // Text to Display => Field Name
                 'Suburb' => 'city',
@@ -26,6 +27,8 @@ if ( class_exists( FilterBuilder::class ) ) {
     global $filter_builder;
 
     foreach ($filter_list as $filter ) {
-        $filter_builder[$filter['content_type']] = new FilterBuilder( $filter[ 'content_type' ], $filter[ 'filter_fields' ], $filter['meta_query'] );
+        $filter_builder[$filter['content_type']] = new FilterBuilder( 
+            $filter[ 'content_type' ], $filter[ 'filter_fields' ], $filter['meta_query'], $filter['taxonomy']
+        );
     }
 }
