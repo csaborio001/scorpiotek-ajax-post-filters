@@ -21,6 +21,16 @@ if ( class_exists( FilterBuilder::class ) ) {
                 ),
             ),
         ),
+        array(
+            'content_type' => 'contact_center',
+            'filter_fields' => array(
+                // Text to Display => Field Name
+                'Suburb' => 'suburb',
+                'Postal Code' => 'postal_code',
+            ),
+            'meta_query' => '',
+            'taxonomy' => '',
+        ),
     );
 
 

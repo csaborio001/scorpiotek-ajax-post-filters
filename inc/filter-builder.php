@@ -17,8 +17,8 @@ class FilterBuilder {
             $this->set_filter_fields( $filter_fields );
             $this->set_meta_query( $meta_query );
             $this->set_taxonomy( $taxonomy );
-            add_action('wp_ajax_myfilter', array( $this, 'scorpiotek_filter_function' ) );
-            add_action('wp_ajax_nopriv_myfilter', array( $this, 'scorpiotek_filter_function' ) );              
+            add_action("wp_ajax_myfilter_{$content_type}", array( $this, 'scorpiotek_filter_function' ) );
+            add_action("wp_ajax_nopriv_myfilter_{$content_type}", array( $this, 'scorpiotek_filter_function' ) );              
         }
         else {
             error_log( __( 'Trying to create a new FilterBuilder using an empty content type.', 'scorpiotek' ) );
@@ -65,7 +65,7 @@ class FilterBuilder {
 
     ?>
     <button id="filter-button"><?php echo __('Apply filter', 'scorpiotek' ); ?></button>
-	<input type="hidden" name="action" value="myfilter">
+	<input type="hidden" name="action" value="myfilter_<?php echo $this->get_content_type(); ?>">
     </form>
     </div> <!-- Filter Groups -->
     
@@ -163,6 +163,44 @@ class FilterBuilder {
             }
         }
 
+        $args['meta_query'][] =  $this->get_meta_query();
+
+        $query = new WP_Query( $args );
+ 
+        $this->print_post_list( $query->post_count, $query );
+     
+        die();        
+    }
+    public function scorpiotek_filter_function_contact_center() {
+        $args = array(
+            'post_type' => 'contact_center',
+            'post_status' => 'publish',            
+            'orderby' => 'date', 
+            // 'order'	=> $_POST['date'] ,
+        );
+        
+        if( !empty( $_POST['categoryfilter'] ) )
+		$args['tax_query'] = array(
+			array(
+				'taxonomy' => $this->get_taxonomy(),
+				'field' => 'term_id',
+                'terms' => $_POST['categoryfilter'],
+                'operator'=> 'IN',
+			)
+        );
+        
+        foreach ( $this->get_filter_fields() as $filter_label => $filter_name ) {
+            if( !empty( $_POST[ $filter_name ] ) )  {
+                $args['meta_query'][] = array(
+                    'key' => $filter_name,
+                    'value' => $_POST[ $filter_name ],
+                    'compare' => '='
+                );
+            }
+        }
+
+        $args['meta_query'][] =  $this->get_meta_query();
+
         $query = new WP_Query( $args );
  
         $this->print_post_list( $query->post_count, $query );
@@ -229,12 +267,6 @@ class FilterBuilder {
     public function get_taxonomy() {
         return $this->taxonomy;
     }
-
-    
-
-    
-    
-
 }
 
 require_once( 'filter-data.php');
