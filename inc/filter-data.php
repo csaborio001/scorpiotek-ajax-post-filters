@@ -31,6 +31,15 @@ if ( class_exists( FilterBuilder::class ) ) {
             'meta_query' => '',
             'taxonomy' => '',
         ),
+        array(
+            'content_type' => 'resources',
+            'filter_fields' => array(
+                // Text to Display => Field Name
+                'Resource Type' => 'resource_type',
+            ),
+            'meta_query' => '',
+            'taxonomy' => 'resources-category',
+        ),
     );
 
 

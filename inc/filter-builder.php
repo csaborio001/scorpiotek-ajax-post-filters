@@ -130,7 +130,7 @@ class FilterBuilder {
     private function print_field_values( $field_name, $field_label, $field_array ) {
         echo '<select name="' . $field_name . '" class="chosen-select"><option value="">Filter by ' . $field_label . '</option>';
         foreach ( $field_array as $field_value ) :
-            echo '<option value="' . $field_value . '">' . $field_value . '</option>'; // ID of the category as the value of an option
+            echo '<option value="' . $field_value . '">' . ucwords( $field_value ). '</option>'; // ID of the category as the value of an option
         endforeach;
         echo '</select>';        
     }

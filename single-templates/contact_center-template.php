@@ -2,6 +2,8 @@
 
 use ScorpioTek\WordPress\Util\PostUtilities;
 
+global $post;
+
 $event_date = get_field( 'start_date' );
 
 ?>
@@ -10,7 +12,7 @@ $event_date = get_field( 'start_date' );
 <div class="col-lg-3 col-md-6 col-sm-6 col-12 mt-30">
     <div class="tm-product">
         <div class="tm-product-image">
-            <a class="tm-product-imagelink" href="product-details.html">
+            <a class="tm-product-imagelink" href="#">
                 <?php
                     if ( method_exists( PostUtilities::class, 'get_featured_image' ) ) {
                         PostUtilities::get_featured_image( $post, array( 322, 375), 'vinnies_location_image', DEFAULT_IMAGE_PATH );
@@ -25,7 +27,7 @@ $event_date = get_field( 'start_date' );
             </ul> -->
         </div>
         <div class="tm-product-content">
-            <h5 class="tm-product-title"><a href="product-details.html"><?php the_title(); ?></a></h5>
+            <h5 class="tm-product-title"><a href="#"><?php the_title(); ?></a></h5>
             <!-- <h6 class="tm-product-price">$99.99 <del>$120.00</del></h6> -->
         </div>
     </div>

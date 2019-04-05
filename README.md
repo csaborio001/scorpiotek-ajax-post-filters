@@ -4,6 +4,10 @@
 
 ## Version History
 
+### 1.0.2.2
+
+Fixed a bug that would cause only one ajax call to take place when there was more than one instance of the Filter Builder: https://wordpress.stackexchange.com/questions/333166/why-is-an-action-callback-function-from-an-instance-of-a-class-always-invoking-t/333180#333180 
+
 ### 1.0.2.1
 
 * Changed the constructor to accept meta_queries, which means meta_queries are no longer hard-wired.
