@@ -4,9 +4,18 @@
 
 ## Version History
 
+### 1.0.2.4
+
+* Fixed a bug that caused no results when default filter was selected.
+
+### 1.0.2.3
+
+* Added option to include date ranges for a particular content type field
+
 ### 1.0.2.2
 
 Fixed a bug that would cause only one ajax call to take place when there was more than one instance of the Filter Builder: https://wordpress.stackexchange.com/questions/333166/why-is-an-action-callback-function-from-an-instance-of-a-class-always-invoking-t/333180#333180 
+
 
 ### 1.0.2.1
 

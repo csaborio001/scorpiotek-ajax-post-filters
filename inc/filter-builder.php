@@ -34,7 +34,8 @@ class FilterBuilder {
     if ( $taxonomy_name != 'none' && !empty ( $taxonomy_name ) ) {
         // Generate the category fields if it generates any results.
         if( $terms = $this->get_categories_by_post_type( $taxonomy_name, $this->get_content_type() ) ) {
-            echo '<select name="categoryfilter" class="chosen-select"><option value="">Filter by category</option>';
+            echo sprintf( '<select name="categoryfilter" id="%1$s" class="chosen-select"><option value="-1">Filter by category</option>',
+                                $taxonomy_name . '_id' );
             foreach ( $terms as $term ) :
                 echo '<option value="' . $term->term_id . '">' . $term->name . '</option>'; // ID of the category as the value of an option
             endforeach;
@@ -64,7 +65,7 @@ class FilterBuilder {
     }
 
     ?>
-    <button id="filter-button"><?php echo __('Apply filter', 'scorpiotek' ); ?></button>
+    <!-- <button id="filter-button"><?php //echo __('Reset filters', 'scorpiotek' ); ?></button> -->
 	<input type="hidden" name="action" value="myfilter_<?php echo $this->get_content_type(); ?>">
     </form>
     </div> <!-- Filter Groups -->
@@ -128,33 +129,47 @@ class FilterBuilder {
     }
 
     private function print_field_values( $field_name, $field_label, $field_array ) {
-        echo '<select name="' . $field_name . '" class="chosen-select"><option value="">Filter by ' . $field_label . '</option>';
+        echo '<select name="' . $field_name . '" class="chosen-select"><option value="-1">Filter by ' . $field_label . '</option>';
         foreach ( $field_array as $field_value ) :
             echo '<option value="' . $field_value . '">' . ucwords( $field_value ). '</option>'; // ID of the category as the value of an option
         endforeach;
         echo '</select>';        
     }
-
+   /**
+    * @summary Callback function when a filter is selected
+    *
+    * @description This is the callback function that is invoked when a selection is made on any of the filters. 
+    *
+    * @author Christian Saborio <csaborio@scorpiotek.com>
+    *
+    */
     public function scorpiotek_filter_function() {
+        // Get all post types represented by this page.
         $args = array(
             'post_type' => $this->get_content_type(),
             'post_status' => 'publish',            
             'orderby' => 'date', 
             // 'order'	=> $_POST['date'] ,
         );
+        // Was the custom category filter for this content type selected?
+        if( !empty( $_POST[ 'categoryfilter' ] ) && ( intval($_POST['categoryfilter'] )  !== -1 ) )  {
+            // Sanitize all values of $_POST.
+            $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            // Set the taxonomy query to bring only results from the custom category filter.
+            $args['tax_query'] = array(
+                array(
+                    'taxonomy' => $this->get_taxonomy(),
+                    'field' => 'term_id',
+                    'terms' => $_POST['categoryfilter'],
+                    'operator'=> 'IN',
+                )
+            );
+        }
         
-        if( !empty( $_POST['categoryfilter'] ) )
-		$args['tax_query'] = array(
-			array(
-				'taxonomy' => $this->get_taxonomy(),
-				'field' => 'term_id',
-                'terms' => $_POST['categoryfilter'],
-                'operator'=> 'IN',
-			)
-        );
-        
+        // Check if other non-category fields were set and iterate through them.
         foreach ( $this->get_filter_fields() as $filter_label => $filter_name ) {
-            if( !empty( $_POST[ $filter_name ] ) )  {
+            if( !empty( $_POST[ $filter_name ] ) && ( intval($_POST[$filter_name] )  !== -1 ) )  {
+                // Set the meta query to filter results based on selected filters.
                 $args['meta_query'][] = array(
                     'key' => $filter_name,
                     'value' => $_POST[ $filter_name ],
@@ -162,49 +177,13 @@ class FilterBuilder {
                 );
             }
         }
-
+        //die(var_dump($args));
+        // Join the meta query by the one specified by the user.
         $args['meta_query'][] =  $this->get_meta_query();
-
         $query = new WP_Query( $args );
- 
-        $this->print_post_list( $query->post_count, $query );
-     
-        die();        
-    }
-    public function scorpiotek_filter_function_contact_center() {
-        $args = array(
-            'post_type' => 'contact_center',
-            'post_status' => 'publish',            
-            'orderby' => 'date', 
-            // 'order'	=> $_POST['date'] ,
-        );
-        
-        if( !empty( $_POST['categoryfilter'] ) )
-		$args['tax_query'] = array(
-			array(
-				'taxonomy' => $this->get_taxonomy(),
-				'field' => 'term_id',
-                'terms' => $_POST['categoryfilter'],
-                'operator'=> 'IN',
-			)
-        );
-        
-        foreach ( $this->get_filter_fields() as $filter_label => $filter_name ) {
-            if( !empty( $_POST[ $filter_name ] ) )  {
-                $args['meta_query'][] = array(
-                    'key' => $filter_name,
-                    'value' => $_POST[ $filter_name ],
-                    'compare' => '='
-                );
-            }
-        }
 
-        $args['meta_query'][] =  $this->get_meta_query();
-
-        $query = new WP_Query( $args );
- 
         $this->print_post_list( $query->post_count, $query );
-     
+        
         die();        
     }
 
