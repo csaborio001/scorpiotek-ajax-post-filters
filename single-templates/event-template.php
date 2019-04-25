@@ -30,15 +30,17 @@ $event_column_count = $query->post_count == 1 ? 'col-lg-12' : 'col-lg-6';
                 <span><a href="#"><i class="zmdi zmdi-label"></i> <?php echo __( 'Event Type: ', 'vinnieslac' ); ?></a>
                     <?php
                         $categories = get_the_terms( $query->post->ID, 'events-category' );
-                        foreach ( $categories as $term ) {
-                            // Need to figure if this is the last item in the list or if this is a list that 
-                            // only has one element in it. 
-                            $last_item = ( ( $categories[ count( $categories ) - 1 ])->name == $term->name ) ||
-                            ( count( $categories) == 1 )  ? true : false;
-                            // If it is not the last element, append comma at the end, otherwise nothing.
-                            echo $term->name . ( $last_item ? '' : ', ' );
+                        if (!empty( $categories ) ) {
+                            foreach ( $categories as $term ) {
+                                // Need to figure if this is the last item in the list or if this is a list that 
+                                // only has one element in it. 
+                                $last_item = ( ( $categories[ count( $categories ) - 1 ])->name == $term->name ) ||
+                                ( count( $categories) == 1 )  ? true : false;
+                                // If it is not the last element, append comma at the end, otherwise nothing.
+                                echo $term->name . ( $last_item ? '' : ', ' );
+                            }
                         }
-                    ?>                                
+                    ?>
                 </span>
             </div>
             <h5 class="tm-blog-title"><a href="<?php the_permalink(); ?>"><?php echo $event_title; ?></a></h5>

@@ -10,13 +10,15 @@ class FilterBuilder {
 
     private $content_type;
     private $filter_fields;
+    private $post_count;
 
-    public function __construct( $content_type, $filter_fields, $meta_query, $taxonomy ) {
-        if ( !empty ($content_type ) ) {
+    public function __construct( $content_type, $filter_fields, $meta_query, $taxonomy, $post_count ) {
+        if ( !empty ( $content_type ) ) {
             $this->set_content_type( $content_type );
             $this->set_filter_fields( $filter_fields );
             $this->set_meta_query( $meta_query );
             $this->set_taxonomy( $taxonomy );
+            $this->set_post_count( $post_count );
             add_action("wp_ajax_myfilter_{$content_type}", array( $this, 'scorpiotek_filter_function' ) );
             add_action("wp_ajax_nopriv_myfilter_{$content_type}", array( $this, 'scorpiotek_filter_function' ) );              
         }
@@ -25,17 +27,20 @@ class FilterBuilder {
         }
     }
 
-    public function generate_form( $taxonomy_name = 'none' ) { ?>
+    public function generate_form() { ?>
     <div class="filter-groups">
         <form action="<?php echo site_url() ?>/wp-admin/admin-ajax.php" method="POST" id="filter">   
 
     <?php
     // Try and generate taxonomy drop down only if $taxonomy_name was specified.
-    if ( $taxonomy_name != 'none' && !empty ( $taxonomy_name ) ) {
-        // Generate the category fields if it generates any results.
-        if( $terms = $this->get_categories_by_post_type( $taxonomy_name, $this->get_content_type() ) ) {
-            echo sprintf( '<select name="categoryfilter" id="%1$s" class="chosen-select"><option value="-1">Filter by category</option>',
-                                $taxonomy_name . '_id' );
+    if ( !empty( $this->get_taxonomy() ) ) {
+        // Retrieves all the terms from the passed down taxonomy
+        $terms = get_terms( $this->get_taxonomy() );
+        if( !empty( $terms ) ) {
+            echo sprintf( '<select name="taxonomy_filter" id="%1$s" class="chosen-select"><option value="-1">%2$s</option>',
+                            $this->get_taxonomy() . '_id' ,
+                            __( 'Filter by category', 'scorpiotek' )
+                        );
             foreach ( $terms as $term ) :
                 echo '<option value="' . $term->term_id . '">' . $term->name . '</option>'; // ID of the category as the value of an option
             endforeach;
@@ -58,7 +63,13 @@ class FilterBuilder {
             if ( $query->have_posts() ) : while( $query->have_posts() ) : $query->the_post();
                 $field_array[] = get_field( $value ); 
                 endwhile;
-            array_unique( $field_array );    
+            // Get rid of any duplicates.
+            $field_array = array_unique( $field_array );
+            // Trim all elements in the array.
+            $field_array = array_map( function( $item_to_trim ) {
+                return trim( $item_to_trim );
+            }, $field_array);
+            
             $this->print_field_values( $value, $field, $field_array );
             endif;
         }
@@ -74,15 +85,15 @@ class FilterBuilder {
 
     }
 
-    public function print_post_list( $post_count = 0, $wp_query = null ) {
-        if ( $post_count == 0 || empty ( $post_count ) ) {
+    public function print_post_list( $post_result_count = -1, $wp_query = null ) {
+        if ( $post_result_count == 0 || empty ( $post_result_count ) ) { // Nothing was found.
             include( 'no-query-found.php' );
             return;
         }
         $query_args = array(
             'post_type' => $this->get_content_type(),
             'post_status' => 'publish',
-            'posts_per_page' => $post_count,
+            'posts_per_page' => $this->get_post_count(),
             'meta_query' => $this->get_meta_query(),
         );
         $query = '';
@@ -148,11 +159,13 @@ class FilterBuilder {
         $args = array(
             'post_type' => $this->get_content_type(),
             'post_status' => 'publish',            
-            'orderby' => 'date', 
+            'orderby' => 'name',
+            'order' => 'ASC', 
+            'posts_per_page' => $this->get_post_count(),
             // 'order'	=> $_POST['date'] ,
         );
-        // Was the custom category filter for this content type selected?
-        if( !empty( $_POST[ 'categoryfilter' ] ) && ( intval($_POST['categoryfilter'] )  !== -1 ) )  {
+        // Is there a custom taxonomy that we need to include in the query?
+        if( !empty( $_POST[ 'taxonomy_filter' ] ) && ( intval($_POST['taxonomy_filter'] )  !== -1 ) )  {
             // Sanitize all values of $_POST.
             $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
             // Set the taxonomy query to bring only results from the custom category filter.
@@ -160,7 +173,7 @@ class FilterBuilder {
                 array(
                     'taxonomy' => $this->get_taxonomy(),
                     'field' => 'term_id',
-                    'terms' => $_POST['categoryfilter'],
+                    'terms' => $_POST['taxonomy_filter'],
                     'operator'=> 'IN',
                 )
             );
@@ -173,13 +186,15 @@ class FilterBuilder {
                 $args['meta_query'][] = array(
                     'key' => $filter_name,
                     'value' => $_POST[ $filter_name ],
-                    'compare' => '='
+                    'compare' => 'like'
                 );
             }
         }
-        //die(var_dump($args));
+
         // Join the meta query by the one specified by the user.
-        $args['meta_query'][] =  $this->get_meta_query();
+        if (!empty( $this->get_meta_query() ) ) {
+            $args['meta_query'][] =  $this->get_meta_query();
+        }
         $query = new WP_Query( $args );
 
         $this->print_post_list( $query->post_count, $query );
@@ -245,6 +260,21 @@ class FilterBuilder {
      */
     public function get_taxonomy() {
         return $this->taxonomy;
+    }
+
+    /**
+     * Setter for post_count
+     *
+     * @param string $post_count the new value of the post_count property.
+     */
+    public function set_post_count( $post_count ) {
+        $this->post_count = $post_count;
+    }
+    /**
+     * Getter for the post_count property.
+     */
+    public function get_post_count() {
+        return $this->post_count;
     }
 }
 

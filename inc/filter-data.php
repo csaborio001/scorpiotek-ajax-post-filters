@@ -20,6 +20,7 @@ if ( class_exists( FilterBuilder::class ) ) {
                     'type' => 'date',
                 ),
             ),
+            'post_count' => -1,
         ),
         array(
             'content_type' => 'contact_center',
@@ -30,15 +31,17 @@ if ( class_exists( FilterBuilder::class ) ) {
             ),
             'meta_query' => '',
             'taxonomy' => '',
+            'post_count' => -1,
         ),
         array(
             'content_type' => 'resources',
             'filter_fields' => array(
                 // Text to Display => Field Name
-                'Resource Type' => 'resource_type',
+                // 'Resource Type' => '',
             ),
             'meta_query' => '',
             'taxonomy' => 'resources-category',
+            'post_count' => -1,
         ),
     );
 
@@ -47,7 +50,7 @@ if ( class_exists( FilterBuilder::class ) ) {
 
     foreach ($filter_list as $filter ) {
         $filter_builder[$filter['content_type']] = new FilterBuilder( 
-            $filter[ 'content_type' ], $filter[ 'filter_fields' ], $filter['meta_query'], $filter['taxonomy']
+            $filter[ 'content_type' ], $filter[ 'filter_fields' ], $filter['meta_query'], $filter['taxonomy'], $filter['post_count']
         );
     }
 }
