@@ -49,7 +49,11 @@ $event_column_count = $query->post_count == 1 ? 'col-lg-12' : 'col-lg-6';
                 <?php
                     if ( method_exists( PostUtilities::class, 'get_excerpt_max_words' ) ) {
                         $short_description = !empty ( $short_description ) ? $short_description . '...' : $short_description;
-                        echo PostUtilities::get_excerpt_max_words( $short_description, 25 );
+                        echo wp_kses(PostUtilities::get_excerpt_max_words( $short_description, 25 ),
+                            array(
+                                'p' => array()
+                            )
+                        );
                     }
                 ?>
             </p>

@@ -4,7 +4,6 @@ use ScorpioTek\WordPress\Util\PostUtilities;
 
 global $post;
 
-$event_date = get_field( 'start_date' );
 $contact_center_map = get_field( 'contact_center_map' );
 $directions_available = !empty( $contact_center_map['lat'] ) &&  !empty ( $contact_center_map['lng'] );
 if ( $directions_available ) {
@@ -14,28 +13,27 @@ if ( $directions_available ) {
         $contact_center_map['lng']
     );
 }
+$contact_center_address = get_field( 'contact_center_address' );
+$suburb = get_field( 'suburb' );
+$state = get_field( 'state' )['value'];
+$postal_code = get_field( 'postal_code' );
 ?>
 
 <!-- Single Contact Center -->
 <div class="col-lg-3 col-md-6 col-sm-6 col-12 mt-30">
     <div class="tm-product">
-        <div class="tm-product-image">
-            <a href="<?php echo $map_url_link; ?>" class="tm-product-imagelink" target="_blank">
-                <?php
-                    if ( method_exists( PostUtilities::class, 'get_featured_image' ) ) {
-                        PostUtilities::get_featured_image( $post, array( 322, 375), 'vinnies_location_image', DEFAULT_IMAGE_PATH );
-                    }
-                ?>                
-            </a>
-
-            <?php if ( $directions_available ) : ?>
-            <ul class="tm-product-actions">
-                <li><a target="_blank" title ="<?php echo __('Get Directions', 'vinnieslac' );?>" href="<?php echo $map_url_link; ?>"><i class="zmdi zmdi-google-maps"></i></a></li>
-            </ul>
-            <?php endif; ?>
-        </div>
         <div class="tm-product-content">
-            <h5 class="tm-product-title"><a href="<?php echo $map_url_link; ?>" target="_blank"><?php the_title(); ?></a></h5>
+            <h5 class="tm-contact-center-title"><a href="<?php echo $map_url_link; ?>" target="_blank"><?php the_title(); ?></a></h5>
+            <p>
+            <?php 
+                echo sprintf(
+                    '%1$s<br>%2$s, %3$s %4$s',
+                    $contact_center_address,
+                    $suburb,
+                    $state,
+                    $postal_code                    
+                ); 
+            ?>
             <div class="get-directions-link">
             <?php 
                 if ( $directions_available ) {
@@ -47,9 +45,11 @@ if ( $directions_available ) {
                 }
             ?>
             </div>
-            <button class="edit-this">
-                <?php edit_post_link(); ?>
-            </button>             
+            <?php if ( current_user_can ( 'edit_post' , $post ) )  : ?>
+                <button class="edit-this">
+                    <?php edit_post_link(); ?>
+                </button>
+            <?php endif; ?>         
         </div>
 
 
