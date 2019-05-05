@@ -96,10 +96,18 @@ class FilterBuilder {
             'posts_per_page' => $this->get_post_count(),
             'meta_query' => $this->get_meta_query(),
         );
+        
         $query = '';
-        if ( !is_null( $wp_query ) && !empty ( $wp_query ) ) {
+        // If the main query has already been set and it has any results, we'll print those results.
+        // This is what will be called when no dropdown AJAX menu has been selected.
+        if ( $GLOBALS['wp_query']->found_posts > 0 ) {
+            $query = $GLOBALS['wp_query'];
+        }
+        // If we have an incoming parameter that has a query result set, we'll print those instead.
+        else if ( !is_null( $wp_query ) && !empty ( $wp_query ) ) {
             $query = $wp_query;
         }
+        // If it's neither of those cases, we'll just display the results from a new query. 
         else {
             $query = new WP_Query( $query_args );
         }

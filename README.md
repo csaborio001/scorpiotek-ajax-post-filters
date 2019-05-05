@@ -4,6 +4,11 @@
 
 ## Version History
 
+### 1.0.2.5
+
+* Fixed a bug that caused the main menu not to be displayed when the main query was modified.
+* Fixed a bug that causes the taxonomy query to be ignored when modifying the main query.
+
 ### 1.0.2.4
 
 * Fixed a bug that caused no results when default filter was selected.
