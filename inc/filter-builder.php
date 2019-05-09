@@ -33,18 +33,22 @@ class FilterBuilder {
 
     <?php
     // Try and generate taxonomy drop down only if $taxonomy_name was specified.
-    if ( !empty( $this->get_taxonomy() ) ) {
-        // Retrieves all the terms from the passed down taxonomy
-        $terms = get_terms( $this->get_taxonomy() );
-        if( !empty( $terms ) ) {
-            echo sprintf( '<select name="taxonomy_filter" id="%1$s" class="chosen-select"><option value="-1">%2$s</option>',
-                            $this->get_taxonomy() . '_id' ,
-                            __( 'Filter by category', 'scorpiotek' )
-                        );
-            foreach ( $terms as $term ) :
-                echo '<option value="' . $term->term_id . '">' . $term->name . '</option>'; // ID of the category as the value of an option
-            endforeach;
-            echo '</select>';
+    if ( is_array( $this->get_taxonomy() ) && !empty( $this->get_taxonomy() ) ) {
+        foreach ( $this->get_taxonomy() as $single_taxonomy ) {
+            $taxonomy_name = ucwords( get_taxonomy( $single_taxonomy )->label );
+            // Retrieves all the terms from the passed down taxonomy
+            $terms = get_terms( $single_taxonomy );
+            if( !empty( $terms ) ) {
+                echo sprintf( '<select name="%1$s" id="%2$s" class="chosen-select"><option value="-1">%3$s</option>',
+                                $single_taxonomy . '_taxonomy_filter',
+                                $single_taxonomy . '_id' ,
+                                __( 'Filter by ', 'scorpiotek' ) . $taxonomy_name
+                            );
+                foreach ( $terms as $term ) :
+                    echo '<option value="' . $term->term_id . '">' . $term->name . '</option>'; // ID of the category as the value of an option
+                endforeach;
+                echo '</select>';
+            }
         }
     }
 
@@ -172,19 +176,21 @@ class FilterBuilder {
             'posts_per_page' => $this->get_post_count(),
             // 'order'	=> $_POST['date'] ,
         );
-        // Is there a custom taxonomy that we need to include in the query?
-        if( !empty( $_POST[ 'taxonomy_filter' ] ) && ( intval($_POST['taxonomy_filter'] )  !== -1 ) )  {
-            // Sanitize all values of $_POST.
+        // Iterate through the array of taxonomies that has been set to see if any has been set
+        foreach ( $this->get_taxonomy() as  $single_taxonomy ) {
+            $select_name = $single_taxonomy . '_taxonomy_filter';
             $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
-            // Set the taxonomy query to bring only results from the custom category filter.
-            $args['tax_query'] = array(
-                array(
-                    'taxonomy' => $this->get_taxonomy(),
-                    'field' => 'term_id',
-                    'terms' => $_POST['taxonomy_filter'],
-                    'operator'=> 'IN',
-                )
-            );
+            // Make sure it's not empty and that it's not default value (-1)
+            if (!empty( $_POST[$select_name] )  && ( intval($_POST[$select_name] )  !== -1 ) ) {
+                $args['tax_query'][] = array(
+                    array(
+                        'taxonomy' => $single_taxonomy,
+                        'field' => 'term_id',
+                        'terms' => $_POST[$select_name],
+                        'operator'=> 'IN',
+                    )
+                );
+            }
         }
         
         // Check if other non-category fields were set and iterate through them.

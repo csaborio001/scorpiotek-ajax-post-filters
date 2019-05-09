@@ -4,6 +4,10 @@
 
 ## Version History
 
+### 1.0.2.6
+
+* Added support for multiple taxonomies.
+
 ### 1.0.2.5
 
 * Fixed a bug that caused the main menu not to be displayed when the main query was modified.

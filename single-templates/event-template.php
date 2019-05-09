@@ -9,11 +9,10 @@ $month = $event_date->format('F');
 $year = $event_date->format('Y');
 $event_title = get_the_title();
 $short_description = get_field( 'short_description' );
-$event_column_count = $query->post_count == 1 ? 'col-lg-12' : 'col-lg-6';
 ?>
 
 <!-- Single Blog -->
-<div class="<?php echo $event_column_count ?> blog-masonry-item">
+<div class="col-lg-6 blog-masonry-item">
     <div class="tm-blog mt-50">
         <div class="tm-blog-top">
             <a href="<?php the_permalink(); ?>">

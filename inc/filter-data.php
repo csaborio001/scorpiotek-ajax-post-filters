@@ -6,11 +6,14 @@ if ( class_exists( FilterBuilder::class ) ) {
     $filter_list = array(
         array(
             'content_type' => 'event',
-            'taxonomy' => 'events-category',
+            'taxonomy' => array( 
+                'events-category',
+                'event-region',
+            ),
             'filter_fields' => array(
                 // Text to Display => Field Name
-                'Suburb' => 'city',
-                'Postal Code' => 'zip',
+                // 'Suburb' => 'city',
+                // 'Postal Code' => 'zip',
             ),
             'meta_query' => array(
                 array(
@@ -40,7 +43,7 @@ if ( class_exists( FilterBuilder::class ) ) {
                 // 'Resource Type' => '',
             ),
             'meta_query' => '',
-            'taxonomy' => 'resources-category',
+            'taxonomy' => array('resources-category'),
             'post_count' => -1,
         ),
     );
