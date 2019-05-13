@@ -10,6 +10,11 @@ if ( class_exists( FilterBuilder::class ) ) {
                 'events-category',
                 'event-region',
             ),
+            'sort' => array( 
+                'orderby' => 'meta_value',
+                'order' => 'ASC',
+                'meta_key' => 'start_date',
+            ),
             'filter_fields' => array(
                 // Text to Display => Field Name
                 // 'Suburb' => 'city',
@@ -29,11 +34,15 @@ if ( class_exists( FilterBuilder::class ) ) {
             'content_type' => 'contact_center',
             'filter_fields' => array(
                 // Text to Display => Field Name
-                'Suburb' => 'suburb',
-                'Postal Code' => 'postal_code',
+                // 'Suburb' => 'suburb',
+                // 'Postal Code' => 'postal_code',
             ),
+            'sort' => array( 
+                'orderby' => 'title',
+                'order' => 'ASC',
+            ),            
             'meta_query' => '',
-            'taxonomy' => '',
+            'taxonomy' => array( 'contact-center-region' ),
             'post_count' => -1,
         ),
         array(
@@ -42,6 +51,10 @@ if ( class_exists( FilterBuilder::class ) ) {
                 // Text to Display => Field Name
                 // 'Resource Type' => '',
             ),
+            'sort' => array( 
+                'orderby' => 'title',
+                'order' => 'ASC',
+            ),             
             'meta_query' => '',
             'taxonomy' => array('resources-category'),
             'post_count' => -1,
@@ -53,7 +66,7 @@ if ( class_exists( FilterBuilder::class ) ) {
 
     foreach ($filter_list as $filter ) {
         $filter_builder[$filter['content_type']] = new FilterBuilder( 
-            $filter[ 'content_type' ], $filter[ 'filter_fields' ], $filter['meta_query'], $filter['taxonomy'], $filter['post_count']
+            $filter[ 'content_type' ], $filter['filter_fields'], $filter['sort'], $filter['meta_query'], $filter['taxonomy'], $filter['post_count']
         );
     }
 }

@@ -11,11 +11,13 @@ class FilterBuilder {
     private $content_type;
     private $filter_fields;
     private $post_count;
+    private $sort_data;
 
-    public function __construct( $content_type, $filter_fields, $meta_query, $taxonomy, $post_count ) {
+    public function __construct( $content_type, $filter_fields, $sort_data, $meta_query, $taxonomy, $post_count ) {
         if ( !empty ( $content_type ) ) {
             $this->set_content_type( $content_type );
             $this->set_filter_fields( $filter_fields );
+            $this->set_sort_data( $sort_data );
             $this->set_meta_query( $meta_query );
             $this->set_taxonomy( $taxonomy );
             $this->set_post_count( $post_count );
@@ -61,6 +63,8 @@ class FilterBuilder {
                 'posts_per_page' => -1,
                 // Only look for posts that will happen today or in the future.
                 'meta_query' => $this->get_meta_query(),
+                'meta_key' => 'start_date',
+ 
             );
             $query  = new WP_Query( $query_args );
             $field_array = array();
@@ -171,11 +175,13 @@ class FilterBuilder {
         $args = array(
             'post_type' => $this->get_content_type(),
             'post_status' => 'publish',            
-            'orderby' => 'name',
-            'order' => 'ASC', 
             'posts_per_page' => $this->get_post_count(),
-            // 'order'	=> $_POST['date'] ,
         );
+        
+        // Merge the sort data.
+        $args = array_merge( $args, $this->get_sort_data() );
+
+
         // Iterate through the array of taxonomies that has been set to see if any has been set
         foreach ( $this->get_taxonomy() as  $single_taxonomy ) {
             $select_name = $single_taxonomy . '_taxonomy_filter';
@@ -289,6 +295,21 @@ class FilterBuilder {
      */
     public function get_post_count() {
         return $this->post_count;
+    }
+
+    /**
+     * Setter for sort_data
+     *
+     * @param string $sort_data the new value of the sort_data property.
+     */
+    public function set_sort_data( $sort_data ) {
+        $this->sort_data = $sort_data;
+    }
+    /**
+     * Getter for the sort_data property.
+     */
+    public function get_sort_data() {
+        return $this->sort_data;
     }
 }
 
