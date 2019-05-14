@@ -4,6 +4,10 @@
 
 ## Version History
 
+### 1.0.2.8
+
+* Cleaned up so that filter-data and inc folder are no longer part of the repo.
+
 ### 1.0.2.7
 
 * Added support for specifying the sort order.
